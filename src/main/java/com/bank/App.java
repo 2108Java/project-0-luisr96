@@ -1,6 +1,6 @@
 package com.bank;
-
-import com.menus.MainMenu;
+import com.menus.Menus;
+import com.models.User;
 
 import java.util.Scanner;
 
@@ -8,26 +8,31 @@ public class App {
 
 	public static void main(String[] args) {
 		
-		MainMenu.showMainMenu();
+		User u = new User();
+		
+		Menus.showMainMenu();
 		
 		Scanner sc = new Scanner(System.in);
 		String choice = sc.nextLine();
-		sc.close();
-		
-		System.out.println("You selected: " + choice);
 		
 		switch (choice) {
 			case "1":
-				System.out.println("Customer login.");
+				Menus.registering(u);
 				break;
 			case "2":
-				System.out.println("Employee login.");
+				Menus.showCustomerLoginMenu();
+				break;
+			case "3":
+				Menus.showEmployeeLoginMenu();
 				break;
 			case "q":
-				System.out.println("Quit.");
+				System.out.println("Quitting application.");
 				break;
 		}
-		
+
+		sc.close();
 	}
+	
+	
 
 }
