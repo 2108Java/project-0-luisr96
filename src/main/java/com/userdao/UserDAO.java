@@ -4,8 +4,6 @@ import java.sql.*;
 
 import org.postgresql.util.PSQLException;
 
-import com.models.User;
-
 public class UserDAO {
 	private static final String AWS = "jdbc:postgresql://bank.cap91ijbfbvc.us-east-2.rds.amazonaws.com/postgres";
 	private static final String USERNAME = "postgres";
@@ -16,6 +14,19 @@ public class UserDAO {
 
 	private static final String EMPLOYEE_LOGIN = "SELECT passcode FROM Employees WHERE username = ? LIMIT 1";
 
+	private static final String APPROVE_REGISTRATIONS = "SELECT username, accountTypeSelect FROM PendingRegistrations";
+	
+	private static final String APPROVE_BY_USERNAME = "INSERT INTO Customers (username, accounttype, balance, passcode) "
+													+ "SELECT username, accountTypeSelect, 0.00, passcode FROM PendingRegistrations "
+													+ "WHERE username = ?;"
+													+ "DELETE FROM PendingRegistrations WHERE username = ?";
+	
+	private static final String REJECT_BY_USERNAME = "DELETE FROM PendingRegistrations WHERE username = ?";
+	
+	private static final String APPROVE_ALL = "";
+	
+	private static final String REJECT_ALL = "TRUNCATE";
+	
 	public void registration(String username, String password, String accountType) throws SQLException {
 		try (Connection conn = DriverManager.getConnection(AWS, USERNAME, PASSWORD);
 
@@ -63,6 +74,74 @@ public class UserDAO {
 		}
 		
 		return username;
+		
+	}
+	
+	public void approveApplications() throws SQLException {
+		
+		Connection conn = DriverManager.getConnection(AWS, USERNAME, PASSWORD);
+		
+		Statement stmt = conn.createStatement();
+
+		ResultSet rs = stmt.executeQuery(APPROVE_REGISTRATIONS);
+		
+		while(rs.next()){
+            System.out.print(" - Username: " + rs.getString("username"));
+            System.out.println(" | Account Type: " + rs.getString("accountTypeSelect"));
+         }
+		
+	}
+
+	public void approveByUsername(String username) throws SQLException {
+		try (Connection conn = DriverManager.getConnection(AWS, USERNAME, PASSWORD);
+
+				PreparedStatement preparedStatement = conn.prepareStatement(APPROVE_BY_USERNAME)) {
+
+			preparedStatement.setString(1, username);
+			preparedStatement.setString(2, username);
+
+			preparedStatement.executeUpdate();
+
+			System.out.println("User approved.");
+
+		} catch (PSQLException e) {
+			System.out.println("Failure to approve.");
+		}
+	}
+		
+	
+	public void rejectByUsername(String username) throws SQLException {
+		try (Connection conn = DriverManager.getConnection(AWS, USERNAME, PASSWORD);
+
+				PreparedStatement preparedStatement = conn.prepareStatement(REJECT_BY_USERNAME)) {
+
+			preparedStatement.setString(1, username);
+
+			preparedStatement.executeUpdate();
+
+			System.out.println("User rejected.");
+
+		} catch (PSQLException e) {
+			System.out.println("Failure to reject.");
+		}
+	}
+		
+
+	public void approveAll() throws SQLException {
+		Connection conn = DriverManager.getConnection(AWS, USERNAME, PASSWORD);
+		
+		Statement stmt = conn.createStatement();
+
+		ResultSet rs = stmt.executeQuery(APPROVE_ALL);
+		
+	}
+
+	public void rejectAll() throws SQLException {
+		Connection conn = DriverManager.getConnection(AWS, USERNAME, PASSWORD);
+		
+		Statement stmt = conn.createStatement();
+
+		ResultSet rs = stmt.executeQuery(REJECT_ALL);
 		
 	}
 
