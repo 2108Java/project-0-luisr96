@@ -140,8 +140,8 @@ public class Service {
 	
 }
 
-	public void viewCustomerAccounts() {
-		// TODO Auto-generated method stub
+	public void viewCustomerAccounts() throws SQLException {
+		userDAO.viewCustomerAccounts();
 		
 	}
 

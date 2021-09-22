@@ -23,9 +23,13 @@ public class UserDAO {
 	
 	private static final String REJECT_BY_USERNAME = "DELETE FROM PendingRegistrations WHERE username = ?";
 	
-	private static final String APPROVE_ALL = "";
+	private static final String APPROVE_ALL = "INSERT INTO Customers (username, accounttype, balance, passcode) "
+											+ "SELECT username, accountTypeSelect, 0.00, passcode FROM PendingRegistrations;"
+											+ "TRUNCATE TABLE PendingRegistrations";
 	
-	private static final String REJECT_ALL = "TRUNCATE";
+	private static final String REJECT_ALL = "TRUNCATE TABLE PendingRegistrations";
+	
+	private static final String VIEW_CUSTOMER_ACCOUNTS = "SELECT customer_id, username, accountType, balance FROM Customers";
 	
 	public void registration(String username, String password, String accountType) throws SQLException {
 		try (Connection conn = DriverManager.getConnection(AWS, USERNAME, PASSWORD);
@@ -132,7 +136,9 @@ public class UserDAO {
 		
 		Statement stmt = conn.createStatement();
 
-		ResultSet rs = stmt.executeQuery(APPROVE_ALL);
+		int rows = stmt.executeUpdate(APPROVE_ALL);
+		
+		System.out.println("All applications accepted.");
 		
 	}
 
@@ -141,7 +147,25 @@ public class UserDAO {
 		
 		Statement stmt = conn.createStatement();
 
-		ResultSet rs = stmt.executeQuery(REJECT_ALL);
+		int rows = stmt.executeUpdate(REJECT_ALL);
+		
+		System.out.println("All applications denied.");
+		
+	}
+
+	public void viewCustomerAccounts() throws SQLException {
+		Connection conn = DriverManager.getConnection(AWS, USERNAME, PASSWORD);
+		
+		Statement stmt = conn.createStatement();
+
+		ResultSet rs = stmt.executeQuery(VIEW_CUSTOMER_ACCOUNTS);
+		
+		while(rs.next()){
+            System.out.print("-ID: " + rs.getString("customer_id"));
+            System.out.print("| Username: " + rs.getString("username"));
+            System.out.print("| Account Type: " + rs.getString("accountType"));
+            System.out.println("| Balance: " + rs.getBigDecimal("balance"));
+         }
 		
 	}
 
