@@ -1,0 +1,38 @@
+public class AccountTest {
+
+	public void setupAccount() {
+	a = new Account();
+	}
+	
+	@Test
+	public void testDeposit() { 
+		
+		assertEquals(900, b.deposit(200, 700))
+		
+	@Test
+	public void testDeposit() { 
+		
+		assertEquals(55, b.deposit(-100, 55))
+		
+	
+	@Test
+	public void testDeposit() { 
+		
+		assertEquals(0, b.deposit(0, 0))
+		
+		
+	@Test
+	public void testWithdraw() { 
+		
+		assertEquals(555, b.deposit(200, 755))
+		
+	
+	@Test
+	public void testWithdraw() { 
+		
+		assertEquals(123, b.deposit(-123, 123))
+
+
+
+
+}
