@@ -1,5 +1,6 @@
 package com.userdao;
 
+import java.math.BigDecimal;
 import java.sql.*;
 
 import org.postgresql.util.PSQLException;
@@ -14,6 +15,8 @@ public class UserDAO {
 
 	private static final String EMPLOYEE_LOGIN = "SELECT passcode FROM Employees WHERE username = ? LIMIT 1";
 
+	private static final String CUSTOMER_LOGIN = "SELECT passcode FROM Customers WHERE username = ? LIMIT 1";
+	
 	private static final String APPROVE_REGISTRATIONS = "SELECT username, accountTypeSelect FROM PendingRegistrations";
 	
 	private static final String APPROVE_BY_USERNAME = "INSERT INTO Customers (username, accounttype, balance, passcode) "
@@ -30,6 +33,12 @@ public class UserDAO {
 	private static final String REJECT_ALL = "TRUNCATE TABLE PendingRegistrations";
 	
 	private static final String VIEW_CUSTOMER_ACCOUNTS = "SELECT customer_id, username, accountType, balance FROM Customers";
+	
+	private static final String VIEW_BALANCE = "SELECT balance FROM Customers WHERE username = ? LIMIT 1";
+	
+	private static final String UPDATE_BALANCE = "UPDATE Customers "
+												+ "SET balance = ? "
+												+ "WHERE username = ?";
 	
 	public void registration(String username, String password, String accountType) throws SQLException {
 		try (Connection conn = DriverManager.getConnection(AWS, USERNAME, PASSWORD);
@@ -89,10 +98,12 @@ public class UserDAO {
 
 		ResultSet rs = stmt.executeQuery(APPROVE_REGISTRATIONS);
 		
+		System.out.printf("%-20s %-25s\n", "Username", "Account Type");
+		System.out.println();
 		while(rs.next()){
-            System.out.print(" - Username: " + rs.getString("username"));
-            System.out.println(" | Account Type: " + rs.getString("accountTypeSelect"));
-         }
+            System.out.printf("%-20s", rs.getString("username"));
+            System.out.printf("%-25s\n", rs.getString("accountTypeSelect"));
+		}
 		
 	}
 
@@ -160,15 +171,98 @@ public class UserDAO {
 
 		ResultSet rs = stmt.executeQuery(VIEW_CUSTOMER_ACCOUNTS);
 		
+		System.out.printf("%-6s %-20s %-25s %-9s\n", "ID", "Username", "Account Type", "Balance");
+		System.out.println();
 		while(rs.next()){
-            System.out.print("-ID: " + rs.getString("customer_id"));
-            System.out.print("| Username: " + rs.getString("username"));
-            System.out.print("| Account Type: " + rs.getString("accountType"));
-            System.out.println("| Balance: " + rs.getBigDecimal("balance"));
+            System.out.printf("%-6s", rs.getString("customer_id"));
+            System.out.printf("%-20s", rs.getString("username"));
+            System.out.printf("%-25s", rs.getString("accountType"));
+            System.out.printf("%-9s\n", rs.getBigDecimal("balance"));
          }
 		
 	}
 
+	public String customerLogin(String username) {
+		
+		try {
+
+			Connection conn = DriverManager.getConnection(AWS, USERNAME, PASSWORD);
+
+			PreparedStatement ps = conn.prepareStatement(CUSTOMER_LOGIN);
+
+			ps.setString(1, username);
+
+			ResultSet rs = ps.executeQuery();
+
+			String correctPassword = null;
+
+			while (rs.next()) {
+				correctPassword = rs.getString("passcode");
+				return correctPassword;
+			}
+
+			System.out.println("Invalid login");
+			System.out.println("Please try again.");
+			System.exit(0);
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return username;
+	}
+
+	public double getBalance(String username) throws SQLException {
+		
+		try {
+
+			Connection conn = DriverManager.getConnection(AWS, USERNAME, PASSWORD);
+
+			PreparedStatement ps = conn.prepareStatement(VIEW_BALANCE);
+
+			ps.setString(1, username);
+
+			ResultSet rs = ps.executeQuery();
+
+			while (rs.next()) {
+				double amountInAccount = rs.getDouble("balance");
+				return amountInAccount;
+			}
+
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return 0;
+
+		
+
+	}
+
+
+	public void updateBalance(double newBalance, String username) throws SQLException {
+
+		try (Connection conn = DriverManager.getConnection(AWS, USERNAME, PASSWORD);
+
+				PreparedStatement preparedStatement = conn.prepareStatement(UPDATE_BALANCE)) {
+
+			preparedStatement.setDouble(1, newBalance);
+			preparedStatement.setString(2, username);
+
+			preparedStatement.executeUpdate();
+
+		} catch (PSQLException e) {
+			System.out.println("There was an error in your transaction.");
+		}
+		
+	}
+
+	
+	
+	
+	
+	
+	
 //
 //	ConnectionEstablisher connectionEstablisher = new ConnectionEstablisher();
 //

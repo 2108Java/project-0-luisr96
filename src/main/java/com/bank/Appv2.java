@@ -14,6 +14,7 @@ public class Appv2 {
 		UserDAO userDAO = new UserDAO();
 		Service service = new Service();
 		User u = new User();
+		String customerUsername = "";
 		
 		boolean isCustomer = false;
 		boolean isEmployee = false;
@@ -38,7 +39,11 @@ public class Appv2 {
 					service.register();
 					break;
 				case "2":
-					System.out.println("2222222222222222222");
+					System.out.println("Please enter your customer username and password.");
+					Scanner sc1 = new Scanner(System.in);
+					System.out.println("Username: ");
+					customerUsername = sc1.nextLine();
+					isCustomer = service.customerLogin(sc1, customerUsername);
 					break;
 				case "3":
 					isEmployee = service.employeeLogin();
@@ -50,9 +55,53 @@ public class Appv2 {
 					System.out.println("Not a valid option.");
 			}
 		}
-	
 		
 		if(isCustomer) {
+			
+			System.out.println("Welcome " + customerUsername);
+			
+			String customerChoice = "";
+			
+			while(customerChoice != "q") {
+				
+				System.out.println("What would you like to do?");
+				System.out.println();
+				System.out.println("Please select an option:");
+				System.out.println("1) View balance");
+				System.out.println("2) Withdraw");
+				System.out.println("3) Deposit");
+				System.out.println("4) Post a money transfer to another account");
+				System.out.println("5) Apply for a joint account");
+				System.out.println();
+				System.out.println("Select 'q' to quit.");
+				
+				Scanner scCustomer = new Scanner(System.in);;
+				customerChoice = scCustomer.nextLine();
+				
+				switch (customerChoice) {
+				case "1":
+					service.getBalance(customerUsername);
+					break;
+				case "2":
+					service.withdraw(customerUsername);
+					break;
+				case "3":
+					service.deposit(customerUsername);
+					break;
+				case "4":
+					service.transferMoney(customerUsername);
+					break;
+				case "5":
+					service.applyForJoint();
+					break;
+				case "q":
+					System.out.println("Quitting application.");
+					System.exit(0);
+				default:
+					System.out.println("Not a valid option.");
+			}
+			}
+			
 			
 		}
 		

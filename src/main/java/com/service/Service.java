@@ -100,6 +100,7 @@ public class Service {
 		System.out.println("2) Reject by username");
 		System.out.println("3) Approve all");
 		System.out.println("4) Reject all");
+		System.out.println("Select 'q' to quit.");
 		
 		Scanner scApproval = new Scanner(System.in);;
 		String approvalChoice = scApproval.nextLine();
@@ -146,6 +147,114 @@ public class Service {
 	}
 
 	public void viewTransactionLog() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public boolean customerLogin(Scanner sc, String customerUsername) {
+//		System.out.println("Please enter your customer username and password.");
+//		Scanner sc = new Scanner(System.in);
+//		System.out.println("Username: ");
+//		String customerUsername = sc.nextLine();
+		System.out.println("Password: ");
+		String password = sc.nextLine();
+		
+		String correctPassword = userDAO.customerLogin(customerUsername);
+		
+		if(password.equals(correctPassword)) {
+			System.out.println("Log in success!");
+			return true;
+		} else {
+			System.out.println("Incorrect password. Please try again.");
+			return false;
+		}
+	}
+
+	public void getBalance(String username) throws SQLException {
+		
+		double amountInAccount = userDAO.getBalance(username);
+		System.out.println("Your balance is: ");
+		System.out.println("$" + amountInAccount);
+		
+	}
+
+	public void withdraw(String username) throws SQLException {
+		
+		System.out.println("How much would you like to withdraw? ");
+		Scanner scWithdraw = new Scanner(System.in);
+		double amountToWithdraw = scWithdraw.nextDouble();
+		
+		// get amount in account
+		double amountInAccount = userDAO.getBalance(username);
+		// if trying to withdraw more than that amount, throw e
+		if(amountToWithdraw > amountInAccount) {
+			System.out.println("Not enough funds for transaction.");
+			return;
+		} else {
+			double newAmountInAccount = amountInAccount - amountToWithdraw;
+			userDAO.updateBalance(newAmountInAccount, username);
+			
+			System.out.println("Your transaction was made successfully.");
+		}
+		
+		
+		
+	}
+
+	public void deposit(String username) throws SQLException {
+		System.out.println("How much would you like to deposit? ");
+		Scanner scDeposit = new Scanner(System.in);
+		double amountToDeposit = scDeposit.nextDouble();
+		
+		
+		// if trying to deposit negative or zero money, throw e
+		if(amountToDeposit < 0) {
+			System.out.println("You can't deposit negative money!");
+		} else if (amountToDeposit == 0) {
+			System.out.println("You can't deposit no money!");
+		} else {
+			// get amount in account
+			double amountInAccount = userDAO.getBalance(username);
+			double newAmountInAccount = amountInAccount + amountToDeposit;
+			userDAO.updateBalance(newAmountInAccount, username);
+			
+			System.out.println("Your transaction was made successfully.");
+		}
+		
+	}
+
+	public void transferMoney(String customerUsername) throws SQLException {
+		System.out.println("What is the username of the person you'd like to transfer money to?");
+		Scanner scTransferUser = new Scanner(System.in);
+		String userToTransferTo = scTransferUser.nextLine();
+		
+		System.out.println("How much would you like to transfer? ");
+		Scanner scTransferAmount = new Scanner(System.in);
+		double amountToTransfer = scTransferAmount.nextDouble();
+		
+		double amountInAccount = userDAO.getBalance(customerUsername);
+		
+		if(amountToTransfer > amountInAccount) {
+			System.out.println("You don't have enough funds!");
+		}
+		
+		if(amountToTransfer < 0) {
+			System.out.println("You can't transfer negative money!");
+		} else if (amountToTransfer == 0) {
+			System.out.println("You can't transfer no money!");
+		}
+			
+		double newAmountInCustomerAccount = amountInAccount - amountToTransfer;
+		userDAO.updateBalance(newAmountInCustomerAccount, customerUsername);
+		
+		double AmountInDestinationAccount = userDAO.getBalance(userToTransferTo);
+		double newAmountInDestinationAccount = AmountInDestinationAccount + amountToTransfer;
+		userDAO.updateBalance(newAmountInDestinationAccount, userToTransferTo);
+		System.out.println("You successfully transferred $" + amountToTransfer 
+				+ " to " + userToTransferTo);
+	}
+
+	public void applyForJoint() {
 		// TODO Auto-generated method stub
 		
 	}
